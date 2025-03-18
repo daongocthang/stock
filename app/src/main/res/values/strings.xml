@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Cổ phiếu</string>
+    <string name="ticker">Mã cổ phiếu</string>
+    <string name="trading_date">Ngày giao dịch</string>
+    <string name="todo">todo</string>
+    <string name="price">Giá đặt</string>
+    <string name="shares">Khối lượng</string>
+    <string name="sell">bán</string>
+    <string name="buy">Mua</string>
+    <string name="invalid_field">"The field is invalid</string>
+</resources>
