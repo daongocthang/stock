@@ -5,6 +5,7 @@ import com.standalone.core.builder.DataType;
 import com.standalone.core.builder.annotation.MetaData;
 import com.standalone.core.util.Json;
 
+
 public class Model {
     @Column(ready_only = true)
     public long id;

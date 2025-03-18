@@ -1,9 +1,8 @@
-package com.standalone.stock;
+package com.standalone.stock.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -14,8 +13,7 @@ import com.standalone.core.ext.Fetcher;
 import com.standalone.core.util.AnyObject;
 import com.standalone.core.util.NetworkUtil;
 import com.standalone.stock.databinding.ActivityLoadingBinding;
-import com.standalone.stock.db.Ticker;
-import com.standalone.stock.db.TickerDao;
+import com.standalone.stock.db.ticker.Ticker;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,7 +38,7 @@ public class LoadingActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         try {
             if (!NetworkUtil.isNetworkAvailable(this)) throw new InterruptedException();
-            performLoadData(fetch(), this::transitMainActivity);
+            performLoadData(prefetch(), this::transitMainActivity);
         } catch (IOException | ExecutionException | InterruptedException e) {
             transitMainActivity();
         }
@@ -82,8 +80,7 @@ public class LoadingActivity extends AppCompatActivity {
     }
 
     @SuppressWarnings("unchecked")
-    Map<String, Object>[] fetch() throws IOException, ExecutionException, InterruptedException {
-        List<Map<String, Object>> results = new ArrayList<>();
+    Map<String, Object>[] prefetch() throws IOException, ExecutionException, InterruptedException {
         Response response = Fetcher.from("https://ai.vietcap.com.vn/api/get_all_tickers").get();
         if (response.body() == null) throw new IOException();
         ObjectMapper mapper = new ObjectMapper();
@@ -100,7 +97,7 @@ public class LoadingActivity extends AppCompatActivity {
         List<?> list = (List<?>) map.get("ticker_info");
         if (list == null) throw new IOException();
 
-
+        List<Map<String, Object>> results = new ArrayList<>();
         for (Object ob : list) {
             if (LinkedHashMap.class.isAssignableFrom(ob.getClass())) {
                 results.add((Map<String, Object>) ob);

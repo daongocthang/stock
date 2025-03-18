@@ -1,4 +1,4 @@
-package com.standalone.stock.db;
+package com.standalone.stock.db.ticker;
 
 import com.standalone.core.builder.DataType;
 import com.standalone.core.builder.annotation.MetaData;
@@ -16,10 +16,9 @@ public class Ticker {
     @Column
     @MetaData(tag = "organ_name", type = DataType.STRING)
     public String organ;
+    public final static TickerDao DAO = new TickerDao();
 
-    public static TickerDao DAO = new TickerDao();
-
-    public boolean migrate() {
-        return DAO.insertIgnoreDuplicate(this) >= 0;
+    public void migrate() {
+        DAO.insertIgnoreDuplicate(this);
     }
 }

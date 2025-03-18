@@ -1,9 +1,8 @@
-package com.standalone.stock.db;
+package com.standalone.stock.db.ticker;
 
 import android.database.Cursor;
 
 import com.standalone.core.dao.Dao;
-import com.standalone.stock.db.Ticker;
 
 import java.util.List;
 
@@ -18,8 +17,8 @@ public class TickerDao extends Dao<Ticker> {
         return fetchAll(curs);
     }
 
-    public long insertIgnoreDuplicate(Ticker ticker) {
-        if (getByName(ticker.name) != null) return -1;
-        return insert(ticker);
+    public void insertIgnoreDuplicate(Ticker ticker) {
+        if (getByName(ticker.name) != null) return;
+        insert(ticker);
     }
 }
