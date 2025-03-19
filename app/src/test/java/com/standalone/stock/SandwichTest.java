@@ -10,10 +10,9 @@ import com.standalone.core.builder.DataBuilder;
 import com.standalone.core.dao.Dao;
 import com.standalone.core.ext.Fetcher;
 import com.standalone.core.util.AnyObject;
-import com.standalone.core.util.DatePicker;
 import com.standalone.stock.db.Stock;
-import com.standalone.stock.db.ticker.Ticker;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -27,6 +26,18 @@ import okhttp3.Response;
 
 @RunWith(RobolectricTestRunner.class)
 public class SandwichTest {
+    public Stock stock;
+
+    @Before
+    public void Setup() {
+        stock = new DataBuilder().add(Stock.Fields.ticker, "AAA")
+                .setDateFormat(Dao.DATE_FORMAT)
+                .add(Stock.Fields.price, 12.1)
+                .add(Stock.Fields.shares, 10000)
+                .add("date", Dao.getTimestamp())
+                .build(Stock.class);
+    }
+
     @Test
     public void testAnyObject() throws IOException, ExecutionException, InterruptedException {
         Response response = Fetcher.from("https://ai.vietcap.com.vn/api/get_all_tickers").get();
@@ -45,13 +56,6 @@ public class SandwichTest {
 
     @Test
     public void testContentBuilder() {
-        Stock stock = new DataBuilder().add(Stock.Fields.ticker, "AAA")
-                .setDateFormat(Dao.DATE_FORMAT)
-                .add(Stock.Fields.price, 12.1)
-                .add(Stock.Fields.shares, 10000)
-                .add("date", Dao.getTimestamp())
-                .build(Stock.class);
-
         ContentValues cv = ContentBuilder.of(stock).fields(Stock.Fields.ticker,
                 Stock.Fields.price,
                 Stock.Fields.shares
@@ -59,4 +63,14 @@ public class SandwichTest {
 
         System.out.println(cv.toString());
     }
+
+
+    @Test
+    public void testDao_Stock() {
+        System.out.println(stock.toString());
+        Stock.DAO.insert(stock);
+
+        System.out.println(Stock.DAO.get(1).toString());
+    }
+
 }

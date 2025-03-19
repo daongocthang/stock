@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.standalone.core.util.AnyObject;
 import com.standalone.core.util.StrUtil;
 
 import java.lang.reflect.Field;
@@ -15,6 +16,9 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
+
+import lombok.SneakyThrows;
 
 public class Dao<T> {
     public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
@@ -36,22 +40,34 @@ public class Dao<T> {
         this.cls = cls;
         this.db = DatabaseManager.getInstance().getDb();
         tableName = StrUtil.pluralize(cls.getSimpleName());
-        createTableIfNotExist();
+        try {
+            createTableIfNotExist();
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Dao() {
         this.cls = getClassType();
         this.db = DatabaseManager.getInstance().getDb();
         tableName = StrUtil.pluralize(cls.getSimpleName());
-        createTableIfNotExist();
+        try {
+            createTableIfNotExist();
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void clear() {
         db.execSQL("DELETE FROM " + tableName);
     }
 
-    public long insert(T t) {
-        return db.insert(tableName, null, parseContentValues(t));
+    public void insert(T t) {
+        try {
+            db.insert(tableName, null, convertToContentValues(t));
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public List<T> list() {
@@ -66,7 +82,11 @@ public class Dao<T> {
 
     @Deprecated
     public void update(long id, T t) {
-        db.update(tableName, parseContentValues(t), "_id = ?", new String[]{String.valueOf(id)});
+        try {
+            db.update(tableName, convertToContentValues(t), "_id = ?", new String[]{String.valueOf(id)});
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void update(long id, ContentValues cv) {
@@ -82,102 +102,102 @@ public class Dao<T> {
         return DatabaseUtils.queryNumEntries(db, tableName);
     }
 
+
     protected T fetchOne(Cursor cursor) {
         T t = null;
-        if (cursor != null) {
+        if (cursor == null) return null;
+
+        try (cursor) {
             if (cursor.moveToFirst()) {
-                t = parseModel(cursor);
+                t = convertToObject(cursor);
             }
-            cursor.close();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException();
         }
+
         return t;
     }
 
     protected List<T> fetchAll(Cursor cursor) {
         List<T> rows = new ArrayList<>();
-        if (cursor != null) {
+        if (cursor == null) return rows;
+
+        try (cursor) {
             if (cursor.moveToFirst()) {
                 do {
-                    rows.add(parseModel(cursor));
+                    rows.add(convertToObject(cursor));
                 } while (cursor.moveToNext());
-            }
 
-            cursor.close();
+            }
+        } catch (IllegalAccessException | InstantiationException e) {
+            throw new RuntimeException();
         }
 
         return rows;
     }
 
-    protected ContentValues parseContentValues(T t) {
+    protected ContentValues convertToContentValues(T t) throws IllegalAccessException {
         ContentValues cv = new ContentValues();
-        accessDeclaredFields(new FieldAccessor() {
-            @Override
-            public void onAccess(Field field, Column column) throws IllegalAccessException {
-                if (column.ready_only()) return;
+        accessDeclaredFields(field -> {
+            Column column = field.getAnnotation(Column.class);
+            assert column != null;
+            if (column.ready_only()) return;
 
-                Object value = field.get(t);
-                Class<?> type = field.getType();
-                String fieldName = getFieldName(column.name(), field.getName());
-                if (value == null) return;
+            Object value = field.get(t);
+            Class<?> type = field.getType();
+            String fieldName = getFieldName(column.name(), field.getName());
+            if (value == null) return;
 
-                if (canAssign(type, Integer.class)) {
-                    cv.put(fieldName, (int) value);
-                } else if (canAssign(type, Long.class)) {
-                    cv.put(fieldName, (long) value);
-                } else if (canAssign(type, Double.class)) {
-                    cv.put(fieldName, (double) value);
-                } else if (canAssign(type, Boolean.class)) {
-                    cv.put(fieldName, (boolean) value);
-                } else {
-                    cv.put(fieldName, String.valueOf(value));
-                }
-
+            if (canAssign(type, int.class)) {
+                cv.put(fieldName, (int) value);
+            } else if (canAssign(type, long.class)) {
+                cv.put(fieldName, (long) value);
+            } else if (canAssign(type, double.class)) {
+                cv.put(fieldName, (double) value);
+            } else if (canAssign(type, boolean.class)) {
+                cv.put(fieldName, (boolean) value);
+            } else {
+                cv.put(fieldName, String.valueOf(value));
             }
         });
         return cv;
     }
 
-    protected T parseModel(Cursor cursor) {
-        try {
-            T t = cls.newInstance();
-            accessDeclaredFields(new FieldAccessor() {
-                @Override
-                public void onAccess(Field field, Column column) throws IllegalAccessException {
-                    Object value = null;
-                    Class<?> type = field.getType();
-                    String fieldName = getFieldName(column.name(), field.getName());
-                    int colIndex = cursor.getColumnIndex((column.ready_only() ? "_" : "") + fieldName);
-                    if (canAssign(type, Integer.class)) {
-                        value = cursor.getInt(colIndex);
-                    } else if (canAssign(type, Long.class)) {
-                        value = cursor.getLong(colIndex);
-                    } else if (canAssign(type, Double.class)) {
-                        value = cursor.getDouble(colIndex);
-                    } else if (canAssign(type, Boolean.class)) {
-                        value = cursor.getInt(colIndex) > 0;
-                    } else if (canAssign(type, String.class)) {
-                        value = cursor.getString(colIndex);
-                    }
+    protected T convertToObject(Cursor cursor) throws IllegalAccessException, InstantiationException {
+        T t = cls.newInstance();
+        accessDeclaredFields(field -> {
+            Object value = null;
+            Column column = field.getAnnotation(Column.class);
+            assert column != null;
+            Class<?> type = field.getType();
+            String fieldName = getFieldName(column.name(), field.getName());
+            int colIndex = cursor.getColumnIndex((column.ready_only() ? "_" : "") + fieldName);
 
-                    if (value != null) field.set(t, value);
-                }
-            });
-            return t;
-        } catch (IllegalAccessException | InstantiationException e) {
-            throw new RuntimeException(e);
-        }
+            if (canAssign(type, long.class)) {
+                value = cursor.getLong(colIndex);
+            } else if (canAssign(type, int.class)) {
+                value = cursor.getInt(colIndex);
+            } else if (canAssign(type, double.class)) {
+                value = cursor.getDouble(colIndex);
+            } else if (canAssign(type, float.class)) {
+                value = cursor.getFloat(colIndex);
+            } else if (canAssign(type, boolean.class)) {
+                value = cursor.getInt(colIndex) > 0;
+            } else if (canAssign(type, String.class)) {
+                value = cursor.getString(colIndex);
+            }
+
+            if (value != null) field.set(t, value);
+        });
+        return t;
     }
 
-    private void accessDeclaredFields(FieldAccessor accessor) {
-        try {
-            for (Field field : getInheritedFields(cls)) {
-                Column column = field.getAnnotation(Column.class);
-                field.setAccessible(true);
-                if (column == null) continue;
-                accessor.onAccess(field, column);
-            }
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
+    private void accessDeclaredFields(Accessor<Field> action) throws IllegalAccessException {
+        for (Field field : getInheritedFields(cls)) {
+            Column column = field.getAnnotation(Column.class);
+            if (column == null) continue;
+            field.setAccessible(true);
+            action.access(field);
         }
     }
 
@@ -194,14 +214,15 @@ public class Dao<T> {
 
 
     private boolean canAssign(Class<?> a, Class<?> b) {
-        return a.isAssignableFrom(b);
+        return b.isAssignableFrom(a);
     }
 
-    private void createTableIfNotExist() {
+    private void createTableIfNotExist() throws IllegalAccessException {
         List<String> cols = new ArrayList<>();
-        accessDeclaredFields(new FieldAccessor() {
-            @Override
-            public void onAccess(Field field, Column column) throws IllegalAccessException {
+        accessDeclaredFields(field -> {
+            {
+                Column column = field.getAnnotation(Column.class);
+                assert column != null;
                 StringBuilder builder = new StringBuilder();
                 String fieldName = getFieldName(column.name(), field.getName());
                 builder.append(column.ready_only() ? "_" : "").append(fieldName).append(" ");
@@ -213,7 +234,7 @@ public class Dao<T> {
                 } else if (canAssign(type, String.class)) {
                     builder.append("TEXT");
                 } else {
-                    throw new DataTypeException();
+                    throw new RuntimeException();
                 }
 
                 if (column.ready_only()) {
@@ -233,19 +254,16 @@ public class Dao<T> {
         return StrUtil.camelToSnake(StrUtil.getOrEmpty(s, defaultValue));
     }
 
-    static class DataTypeException extends RuntimeException {
-
-    }
-
-    interface FieldAccessor {
-        void onAccess(Field field, Column column) throws IllegalAccessException;
-    }
-
-
     @SuppressWarnings("unchecked")
     public Class<T> getClassType() {
         ParameterizedType parameterizedType = (ParameterizedType) getClass().getGenericSuperclass();
         assert parameterizedType != null;
         return (Class<T>) parameterizedType.getActualTypeArguments()[0];
+    }
+
+    @FunctionalInterface
+    interface Accessor<T> {
+        void access(T t) throws IllegalAccessException;
+
     }
 }

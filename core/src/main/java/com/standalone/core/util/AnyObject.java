@@ -37,43 +37,43 @@ public class AnyObject {
         }
     }
 
-    static Long stringToLong(String s) {
-        return Long.valueOf(s);
+    static long stringToLong(String s) {
+        return Long.parseLong(s);
     }
 
     static String longToString(Long l) {
         return String.valueOf(l);
     }
 
-    static Integer stringToInteger(String s) {
-        return Integer.valueOf(s);
+    static int stringToInteger(String s) {
+        return Integer.parseInt(s);
     }
 
     static String integerToString(Integer i) {
         return String.valueOf(i);
     }
 
-    static Double stringToDouble(String s) {
-        return Double.valueOf(s);
+    static double stringToDouble(String s) {
+        return Double.parseDouble(s);
     }
 
     static String doubleToString(Double d) {
         return String.valueOf(d);
     }
 
-    static Float stringToFloat(String s) {
-        return Float.valueOf(s);
+    static float stringToFloat(String s) {
+        return Float.parseFloat(s);
     }
 
     static String floatToString(Float f) {
         return String.valueOf(f);
     }
 
-    static Boolean stringToBoolean(String s) {
+    static boolean stringToBoolean(String s) {
         return Boolean.parseBoolean(s);
     }
 
-    static Boolean integerToBoolean(Integer i) {
+    static boolean integerToBoolean(Integer i) {
         return i > 0 ? Boolean.TRUE : Boolean.FALSE;
     }
 

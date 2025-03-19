@@ -6,8 +6,10 @@ import com.standalone.core.dao.Column;
 import com.standalone.core.dao.Dao;
 import com.standalone.core.dao.Model;
 
+import lombok.ToString;
 import lombok.experimental.FieldNameConstants;
 
+@ToString
 @FieldNameConstants
 public class Stock extends Model {
     @Column
@@ -24,4 +26,6 @@ public class Stock extends Model {
     public long matchedTime;
 
     public final static Dao<Stock> DAO = Dao.of(Stock.class);
+
+
 }
