@@ -1,8 +1,9 @@
-package com.standalone.stock.db.ticker;
+package com.standalone.stock.db.dao;
 
 import android.database.Cursor;
 
 import com.standalone.core.dao.Dao;
+import com.standalone.stock.db.schema.Ticker;
 
 import java.util.List;
 

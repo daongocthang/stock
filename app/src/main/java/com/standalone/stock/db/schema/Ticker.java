@@ -1,8 +1,9 @@
-package com.standalone.stock.db.ticker;
+package com.standalone.stock.db.schema;
 
 import com.standalone.core.builder.DataType;
 import com.standalone.core.builder.annotation.MetaData;
 import com.standalone.core.dao.Column;
+import com.standalone.stock.db.dao.TickerDao;
 
 import lombok.NoArgsConstructor;
 

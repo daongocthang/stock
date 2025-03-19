@@ -1,8 +1,9 @@
-package com.standalone.stock.modals;
+package com.standalone.stock.fragments;
 
-import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,7 +20,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.standalone.core.builder.DataBuilder;
 import com.standalone.core.dao.Dao;
-import com.standalone.core.dao.Model;
 import com.standalone.core.util.DatePicker;
 import com.standalone.core.util.InputValidator;
 import com.standalone.core.util.Inspection;
@@ -28,11 +28,11 @@ import com.standalone.core.util.TimeMillis;
 import com.standalone.stock.ContentBuilder;
 import com.standalone.stock.R;
 import com.standalone.stock.databinding.BottomDialogBinding;
-import com.standalone.stock.db.Stock;
-import com.standalone.stock.db.TradeRecord;
-import com.standalone.stock.db.ticker.Ticker;
-import com.standalone.stock.modals.autocomplete.DecimalSuggestion;
-import com.standalone.stock.modals.autocomplete.TickerSuggestion;
+import com.standalone.stock.db.schema.Stock;
+import com.standalone.stock.db.schema.TradeRecord;
+import com.standalone.stock.db.schema.Ticker;
+import com.standalone.stock.adapters.autocomplete.DecimalSuggestion;
+import com.standalone.stock.adapters.autocomplete.TickerSuggestion;
 
 import java.text.ParseException;
 import java.util.HashMap;
@@ -53,6 +53,13 @@ public class BottomDialog extends BottomSheetDialogFragment {
 
     public static BottomDialog from(AppCompatActivity activity) {
         return new BottomDialog(activity);
+    }
+
+    public BottomDialog setArgument(Long l) {
+        Bundle bundle = new Bundle();
+        bundle.putLong(ARG_NAME, l);
+        this.setArguments(bundle);
+        return this;
     }
 
     public void show() {
@@ -126,7 +133,7 @@ public class BottomDialog extends BottomSheetDialogFragment {
 
         // TextField::Date
         binding.edDate.setText(TimeMillis.format(DatePicker.UTC_TODAY, DATE_FORMAT));
-        binding.btCalendar.setEndIconOnClickListener(new View.OnClickListener() {
+        binding.btCalender.setEndIconOnClickListener(new View.OnClickListener() {
             final DatePicker datePicker = DatePicker.Builder.from(activity).build();
 
             @Override
@@ -153,7 +160,6 @@ public class BottomDialog extends BottomSheetDialogFragment {
             }
         });
 
-
         setupIfSelling();
         setupIfBuying();
     }
@@ -165,11 +171,12 @@ public class BottomDialog extends BottomSheetDialogFragment {
                 InputValidator.getInstance().validate(editText).notEmpty();
                 map.put(editText.getTag().toString(), editText.getText().toString());
             });
-
             final DataBuilder builder = new DataBuilder();
 
             Stock stock = builder.setDateFormat(DATE_FORMAT).add(map).build(Stock.class);
 
+            // Writing to history
+            recordTrading(builder);
 
             if (canSell) {
                 updateOrDelete(stock);
@@ -177,37 +184,51 @@ public class BottomDialog extends BottomSheetDialogFragment {
                 Stock.DAO.insert(stock);
             }
 
-            // Writing to history
-            builder.add(TradeRecord.Fields.isSellOrder, canSell)
-                    .add(TradeRecord.Fields.purchasePrice, canSell ? Stock.DAO.get(itemId).price : 0);
-            TradeRecord record = builder.build(TradeRecord.class);
-            TradeRecord.DAO.insert(record);
-
+            dismiss();
         } catch (InputValidator.ValidationError ignore) {
         }
+    }
+
+    private void recordTrading(DataBuilder builder) {
+        builder.add(TradeRecord.Fields.isSellOrder, canSell)
+                .add(TradeRecord.Fields.purchasePrice, canSell ? Stock.DAO.get(itemId).price : 0);
+        TradeRecord record = builder.build(TradeRecord.class);
+        TradeRecord.DAO.insert(record);
     }
 
     void updateOrDelete(Stock stock) {
         Stock holder = Stock.DAO.get(itemId);
         long shares = holder.shares - stock.shares;
         if (shares < 0) {
-            InputValidator.getInstance().validate(binding.edShares).setError(getString(R.string.invalid_field));
+            InputValidator.getInstance().validate(binding.edShares).setError(getString(R.string.invalid));
             return;
         }
 
         if (shares > 0) {
             stock.shares = shares;
             stock.updatedAt = Dao.getTimestamp();
-            ContentValues cv = ContentBuilder.of(Stock.class).fields(
-                    Stock.Fields.ticker,
-                    Stock.Fields.shares,
-                    Stock.Fields.price,
-                    "updatedAt"
-            ).build();
+            ContentValues cv = ContentBuilder.from(stock)
+                    .fields(Stock.Fields.ticker,
+                            Stock.Fields.shares,
+                            Stock.Fields.price,
+                            "updatedAt")
+                    .build();
             Stock.DAO.update(itemId, cv);
             return;
         }
 
         Stock.DAO.delete(itemId);
+    }
+
+    @Override
+    public void onDismiss(@NonNull DialogInterface dialog) {
+        Activity activity = getActivity();
+        if (activity instanceof OnCloseListener) {
+            ((OnCloseListener) activity).onClose(dialog);
+        }
+    }
+
+    public interface OnCloseListener {
+        void onClose(DialogInterface dialog);
     }
 }

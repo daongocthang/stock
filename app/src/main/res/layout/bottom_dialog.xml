@@ -17,7 +17,7 @@
         android:hint="@string/ticker">
 
         <AutoCompleteTextView
-            android:id="@+id/edTicker"
+            android:id="@+id/ed_ticker"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@null"
@@ -39,7 +39,7 @@
         android:hint="@string/shares">
 
         <com.google.android.material.textfield.MaterialAutoCompleteTextView
-            android:id="@+id/edShares"
+            android:id="@+id/ed_shares"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:completionThreshold="1"
@@ -59,7 +59,7 @@
         android:hint="@string/price">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/edPrice"
+            android:id="@+id/ed_price"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="numberDecimal"
@@ -69,7 +69,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/btCalendar"
+        android:id="@+id/bt_calender"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -80,16 +80,16 @@
         app:errorIconDrawable="@null">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/edDate"
+            android:id="@+id/ed_date"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="date"
             android:padding="16dp"
-            android:tag="date" />
+            android:tag="matchedTime" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <Button
-        android:id="@+id/btSubmit"
+        android:id="@+id/bt_submit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"

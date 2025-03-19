@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
-import lombok.SneakyThrows;
 
 public class Dao<T> {
     public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";

@@ -1,4 +1,4 @@
-package com.standalone.stock.modals.autocomplete;
+package com.standalone.stock.adapters.autocomplete;
 
 import android.app.Activity;
 import android.content.Context;
@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 
 import com.standalone.core.adapter.AutoCompleteAdapter;
 import com.standalone.stock.databinding.ItemTickerBinding;
-import com.standalone.stock.db.ticker.Ticker;
+import com.standalone.stock.db.schema.Ticker;
 
 import java.util.ArrayList;
 import java.util.List;

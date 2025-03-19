@@ -5,7 +5,7 @@
     android:paddingHorizontal="8dp">
 
     <TextView
-        android:id="@+id/tvTicker"
+        android:id="@+id/tv_ticker"
         android:layout_width="54dp"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
@@ -15,11 +15,11 @@
         android:textSize="18sp" />
 
     <TextView
-        android:id="@+id/tvOrgan"
+        android:id="@+id/tv_organ"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
-        android:layout_toEndOf="@+id/tvTicker"
+        android:layout_toEndOf="@+id/tv_ticker"
         android:text="Organ"
         android:textSize="14sp" />
 

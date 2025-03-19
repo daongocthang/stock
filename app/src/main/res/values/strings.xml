@@ -7,5 +7,7 @@
     <string name="shares">Khối lượng</string>
     <string name="sell">bán</string>
     <string name="buy">Mua</string>
-    <string name="invalid_field">"The field is invalid</string>
+    <string name="invalid">"Không hợp lệ</string>
+    <string name="stop_loss">Dừng lỗ</string>
+    <string name="sample">sample</string>
 </resources>

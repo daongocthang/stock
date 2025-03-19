@@ -1,4 +1,4 @@
-package com.standalone.stock.modals.autocomplete;
+package com.standalone.stock.adapters.autocomplete;
 
 import android.view.LayoutInflater;
 import android.view.View;

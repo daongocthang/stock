@@ -13,7 +13,7 @@ import com.standalone.core.ext.Fetcher;
 import com.standalone.core.util.AnyObject;
 import com.standalone.core.util.NetworkUtil;
 import com.standalone.stock.databinding.ActivityLoadingBinding;
-import com.standalone.stock.db.ticker.Ticker;
+import com.standalone.stock.db.schema.Ticker;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -10,7 +10,7 @@ import com.standalone.core.builder.DataBuilder;
 import com.standalone.core.dao.Dao;
 import com.standalone.core.ext.Fetcher;
 import com.standalone.core.util.AnyObject;
-import com.standalone.stock.db.Stock;
+import com.standalone.stock.db.schema.Stock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -56,7 +56,7 @@ public class SandwichTest {
 
     @Test
     public void testContentBuilder() {
-        ContentValues cv = ContentBuilder.of(stock).fields(Stock.Fields.ticker,
+        ContentValues cv = ContentBuilder.from(stock).fields(Stock.Fields.ticker,
                 Stock.Fields.price,
                 Stock.Fields.shares
         ).build();

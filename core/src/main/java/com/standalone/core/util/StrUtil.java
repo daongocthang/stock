@@ -12,7 +12,7 @@ public class StrUtil {
     }
 
     public static String camelToSnake(String s) {
-        s = s.replace("_", "");
+//        s = s.replace("_", "");
         StringBuilder builder = new StringBuilder();
         builder.append(Character.toLowerCase(s.charAt(0)));
         for (int i = 1; i < s.length(); i++) {
