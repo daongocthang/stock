@@ -25,7 +25,7 @@ import com.standalone.core.util.InputValidator;
 import com.standalone.core.util.Inspection;
 import com.standalone.core.util.NumericFormat;
 import com.standalone.core.util.TimeMillis;
-import com.standalone.stock.ContentBuilder;
+import com.standalone.core.builder.ContentBuilder;
 import com.standalone.stock.R;
 import com.standalone.stock.databinding.BottomDialogBinding;
 import com.standalone.stock.db.schema.Stock;
@@ -33,6 +33,7 @@ import com.standalone.stock.db.schema.TradeRecord;
 import com.standalone.stock.db.schema.Ticker;
 import com.standalone.stock.adapters.autocomplete.DecimalSuggestion;
 import com.standalone.stock.adapters.autocomplete.TickerSuggestion;
+import com.standalone.stock.settings.Config;
 
 import java.text.ParseException;
 import java.util.HashMap;
@@ -100,13 +101,14 @@ public class BottomDialog extends BottomSheetDialogFragment {
 
     private void setupIfSelling() {
         if (!canSell) return;
+        Config config = Config.of(activity);
 
         Stock stock = Stock.DAO.get(itemId);
         binding.edTicker.setText(stock.ticker);
         binding.edTicker.setEnabled(false);
 
         binding.edShares.setText(NumericFormat.format(stock.shares));
-        binding.edPrice.setText(String.valueOf(stock.price));
+        binding.edPrice.setText(String.valueOf(stock.price * (1 + config.getCost())));
         binding.edDate.setText(TimeMillis.format(stock.matchedTime, DATE_FORMAT));
 
         binding.btSubmit.setText(R.string.sell);
@@ -208,7 +210,7 @@ public class BottomDialog extends BottomSheetDialogFragment {
             stock.shares = shares;
             stock.updatedAt = Dao.getTimestamp();
             ContentValues cv = ContentBuilder.from(stock)
-                    .fields(Stock.Fields.ticker,
+                    .select(Stock.Fields.ticker,
                             Stock.Fields.shares,
                             Stock.Fields.price,
                             "updatedAt")
@@ -222,7 +224,6 @@ public class BottomDialog extends BottomSheetDialogFragment {
 
     @Override
     public void onDismiss(@NonNull DialogInterface dialog) {
-        Activity activity = getActivity();
         if (activity instanceof OnCloseListener) {
             ((OnCloseListener) activity).onClose(dialog);
         }

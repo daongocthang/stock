@@ -19,10 +19,7 @@ public class MainActivity extends AppCompatActivity implements BottomDialog.OnCl
         super.onCreate(savedInstanceState);
         ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        adapter = new StockAdapter();
-        adapter.setOnItemClickListener(view -> {
-            BottomDialog.from(this).setArgument().show();
-        });
+        adapter = new StockAdapter(this);
 
         binding.recyclerView.setAdapter(adapter);
         binding.fab.setOnClickListener(view -> {

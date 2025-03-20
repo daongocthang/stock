@@ -1,4 +1,4 @@
-package com.standalone.stock;
+package com.standalone.core.builder;
 
 import android.content.ContentValues;
 
@@ -17,7 +17,7 @@ public class ContentBuilder<T> {
         return new ContentBuilder<>(target);
     }
 
-    public ContentBuilder<T> fields(String... names) {
+    public ContentBuilder<T> select(String... names) {
         fieldNameList.addAll(Arrays.asList(names));
         return this;
     }

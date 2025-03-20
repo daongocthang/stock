@@ -22,7 +22,7 @@ public class Stock extends Model implements Comparable<Stock> {
     public long shares;
     @Column
     @MetaData(type = DataType.NUMBER)
-    public double price;
+    public float price;
     @Column
     @MetaData(type = DataType.TIME)
     public long matchedTime;

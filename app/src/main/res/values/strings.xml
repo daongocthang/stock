@@ -10,4 +10,9 @@
     <string name="invalid">"Không hợp lệ</string>
     <string name="stop_loss">Dừng lỗ</string>
     <string name="sample">sample</string>
+    <string name="transaction_cost">Phí giao dịch</string>
+    <string name="tax">Thuế</string>
+    <string name="save">Lưu</string>
+    <!-- CONSTANT -->
+    <string name="CONFIG_PREFS">config_prefs</string>
 </resources>

@@ -6,6 +6,7 @@ import android.content.ContentValues;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.standalone.core.builder.ContentBuilder;
 import com.standalone.core.builder.DataBuilder;
 import com.standalone.core.dao.Dao;
 import com.standalone.core.ext.Fetcher;
@@ -56,7 +57,7 @@ public class SandwichTest {
 
     @Test
     public void testContentBuilder() {
-        ContentValues cv = ContentBuilder.from(stock).fields(Stock.Fields.ticker,
+        ContentValues cv = ContentBuilder.from(stock).select(Stock.Fields.ticker,
                 Stock.Fields.price,
                 Stock.Fields.shares
         ).build();
