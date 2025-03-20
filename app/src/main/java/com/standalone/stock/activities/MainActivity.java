@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.View;
 
 import com.standalone.stock.adapters.StockAdapter;
 import com.standalone.stock.databinding.ActivityMainBinding;
@@ -18,7 +19,11 @@ public class MainActivity extends AppCompatActivity implements BottomDialog.OnCl
         super.onCreate(savedInstanceState);
         ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        adapter = new StockAdapter(this);
+        adapter = new StockAdapter();
+        adapter.setOnItemClickListener(view -> {
+            BottomDialog.from(this).setArgument().show();
+        });
+
         binding.recyclerView.setAdapter(adapter);
         binding.fab.setOnClickListener(view -> {
             BottomDialog.from(this).show();
